@@ -1,0 +1,316 @@
+<!-- SUWJTech -->
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B站视频下载器</title>
+  <style>
+    /* 全局样式重置与基础设置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 容器样式 - 卡片化设计 */
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin-top: 50px;
+    }
+
+    /* 标题样式 */
+    .page-title {
+      color: #fb7299;
+      /* B站粉色系 */
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-title::before,
+    .page-title::after {
+      content: "";
+      width: 40px;
+      height: 2px;
+      background: #fb7299;
+      margin: 0 15px;
+    }
+
+    /* 输入框与按钮区域 */
+    .input-group {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    #url {
+      flex: 1;
+      padding: 12px 18px;
+      border: 2px solid #e5e6eb;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    #url:focus {
+      border-color: #00a1d6;
+      /* B站蓝色系 */
+      box-shadow: 0 0 0 3px rgba(0, 161, 214, 0.1);
+    }
+
+    #url::placeholder {
+      color: #c9cdcf;
+    }
+
+    /* 按钮通用样式 */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #00a1d6;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #0086b3;
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-download {
+      background: #f47521;
+      /* B站橙色系 */
+      color: #fff;
+      padding: 8px 16px;
+      font-size: 14px;
+    }
+
+    .btn-download:hover {
+      background: #e06818;
+      transform: translateY(-1px);
+    }
+
+    /* 视频信息展示区域 */
+    #info {
+      width: 100%;
+    }
+
+    .video-title {
+      color: #333;
+      font-size: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .video-parts {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .part-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      background: #f9fafc;
+      border-radius: 8px;
+    }
+
+    .part-name {
+      color: #4e5969;
+      font-size: 16px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* 加载状态提示（新增） */
+    .loading {
+      color: #00a1d6;
+      text-align: center;
+      padding: 20px;
+      font-size: 16px;
+    }
+
+    /* 错误提示样式（新增） */
+    .error {
+      color: #f53f3f;
+      text-align: center;
+      padding: 20px;
+      font-size: 16px;
+      background: #fff2f2;
+      border-radius: 8px;
+    }
+
+    /* 响应式适配 - 手机端 */
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+        margin-top: 30px;
+      }
+
+      .page-title {
+        font-size: 20px;
+      }
+
+      .page-title::before,
+      .page-title::after {
+        width: 30px;
+      }
+
+      .input-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .btn {
+        padding: 12px;
+      }
+
+      .part-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .part-name {
+        white-space: normal;
+        line-height: 1.5;
+      }
+
+      .btn-download {
+        align-self: flex-end;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2 class="page-title">B站视频下载</h2>
+
+    <div class="input-group">
+      <input id="url" placeholder="请输入B站视频链接（支持BV号/AV号链接）" type="text" />
+      <button class="btn btn-primary" onclick="getInfo()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+        解析视频
+      </button>
+    </div>
+
+    <div id="info"></div>
+  </div>
+
+  <script>
+    const apiBase = 'http://localhost:8000/api';
+
+    async function getInfo() {
+      const urlInput = document.getElementById('url');
+      const url = urlInput.value.trim();
+      const infoContainer = document.getElementById('info');
+
+      // 1. 输入校验
+      if (!url) {
+        alert('请输入视频链接');
+        urlInput.focus();
+        return;
+      }
+
+      // 2. 显示加载状态
+      infoContainer.innerHTML = `
+    <div class="loading">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="animate-spin">
+        <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M5.636 5.636L18.364 18.364" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18.364 5.636L5.636 18.364" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      正在解析视频信息...
+    </div>
+  `;
+
+      try {
+        // 3. 调用接口获取数据
+        const res = await fetch(`${apiBase}/info?url=${encodeURIComponent(url)}`);
+        if (!res.ok) throw new Error('解析失败，请检查链接是否有效');
+
+        const j = await res.json();
+        // 4. 渲染视频信息
+        infoContainer.innerHTML = `
+      <h3 class="video-title">${j.title}</h3>
+      <div class="video-parts">
+        ${j.parts.map(p => `
+          <div class="part-item">
+            <span class="part-name">${p.part}</span>
+            <button class="btn btn-download" onclick="download('${j.bvid}',${p.cid})">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M17 8L12 3L7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              下载
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+      } catch (err) {
+        // 5. 错误处理
+        infoContainer.innerHTML = `<div class="error">${err.message}</div>`;
+      }
+    }
+
+    function download(bvid, cid) {
+      window.open(`${apiBase}/download?bvid=${bvid}&cid=${cid}`, '_blank');
+    }
+
+    // 新增：支持回车键触发解析
+    document.getElementById('url').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') getInfo();
+    });
+  </script>
+</body>
+
+</html>
