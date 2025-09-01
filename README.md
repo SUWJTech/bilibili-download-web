@@ -82,5 +82,5 @@ frontend/index.html
 
 
 
-![效果展示图1](此处可替换为实际图片路径或链接)
+![demo](https://github.com/SUWJTech/bilibili-download-web/blob/main/demo.png)
 
