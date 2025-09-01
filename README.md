@@ -82,5 +82,5 @@ frontend/index.html
 
 
 
-![[/demo.png](https://github.com/SUWJTech/bilibili-download-web/blob/main/demo.png)]
+![demo](https://github.com/SUWJTech/bilibili-download-web/blob/main/demo.png)
 
